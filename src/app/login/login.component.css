@@ -1,0 +1,12 @@
+.mat-card{
+  margin: auto;
+  padd-top: 10%;
+  width: 50%;
+}
+.mat-card-content{
+  padding-left: 10%;
+  padding-right: 10%;
+}
+.mat-form-field-label{
+  color: white;
+}

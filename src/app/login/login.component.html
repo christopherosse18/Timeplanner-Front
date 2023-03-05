@@ -1,0 +1,17 @@
+<mat-card>
+  <mat-card-content>
+    <div>
+      <h1>Page de login</h1>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Nom d'utilisateur</mat-label>
+          <input matInput [(ngModel)]="username">
+          <mat-icon matSuffix>sentiment_very_satisfied</mat-icon>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="postValues(username)" >Login</button>
+      </p>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+
