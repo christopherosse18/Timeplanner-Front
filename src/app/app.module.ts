@@ -2,13 +2,13 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import {SchedulerComponent} from "./temps/scheduler/scheduler.component";
+import {EventDetails, SchedulerComponent} from "./temps/scheduler/scheduler.component";
 import {NavbarComponent} from "./temps/navbar/navbar.component";
 import {TempsComponent} from "./temps/temps.component";
 import {LoginComponent} from "./login/login.component";
 import {HttpClientModule} from "@angular/common/http";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatCardModule} from "@angular/material/card";
 import {MatInputModule} from "@angular/material/input";
 import {MatIconModule} from "@angular/material/icon";
@@ -29,6 +29,7 @@ import {MatNativeDateModule} from "@angular/material/core";
 import * as moment from 'moment';
 import {AppRoutingModule} from "./app-routing.module";
 import {MatExpansionModule} from "@angular/material/expansion";
+import {MatDialogModule} from "@angular/material/dialog";
 
 export function momentAdapterFactory() {
   return adapterFactory();
@@ -40,7 +41,8 @@ export function momentAdapterFactory() {
     LoginComponent,
     TempsComponent,
     NavbarComponent,
-    SchedulerComponent
+    SchedulerComponent,
+    EventDetails
   ],
   imports: [
     BrowserModule,
@@ -71,7 +73,9 @@ export function momentAdapterFactory() {
     ),
     MatNativeDateModule,
     CalendarModule.forRoot({provide: DateAdapter, useFactory: adapterFactory}),
-    MatExpansionModule
+    MatExpansionModule,
+    MatDialogModule,
+    ReactiveFormsModule
   ],
   providers: [
     MatDatepickerModule,

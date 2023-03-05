@@ -91,6 +91,11 @@
 
 
 </div>
+<div>
+  <button mat-raised-button color="primary" >
+  Refresh
+  </button>
+</div>
 <br />
 
 <div [ngSwitch]="view">
@@ -130,6 +135,7 @@
     (eventTimesChanged)="eventTimesChanged($event)"
     (hourSegmentClicked)="clickedDate = $event.date"
     (eventClicked)="eventClicked($event)"
+    [(ngModel)]="events"
   >
   </mwl-calendar-day-view>
 </div>
