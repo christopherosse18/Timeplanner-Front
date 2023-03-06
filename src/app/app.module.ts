@@ -1,5 +1,7 @@
-import { NgModule } from '@angular/core';
+import {LOCALE_ID, NgModule} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import localeFr from '@angular/common/locales/fr';
+registerLocaleData(localeFr);
 
 import { AppComponent } from './app.component';
 import {EventDetails, SchedulerComponent} from "./temps/scheduler/scheduler.component";
@@ -30,6 +32,12 @@ import * as moment from 'moment';
 import {AppRoutingModule} from "./app-routing.module";
 import {MatExpansionModule} from "@angular/material/expansion";
 import {MatDialogModule} from "@angular/material/dialog";
+import {
+  NgxMatDatetimePickerModule,
+  NgxMatNativeDateModule,
+  NgxMatTimepickerModule
+} from "@angular-material-components/datetime-picker";
+import {registerLocaleData} from "@angular/common";
 
 export function momentAdapterFactory() {
   return adapterFactory();
@@ -75,14 +83,18 @@ export function momentAdapterFactory() {
     CalendarModule.forRoot({provide: DateAdapter, useFactory: adapterFactory}),
     MatExpansionModule,
     MatDialogModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
+    NgxMatNativeDateModule,
   ],
   providers: [
     MatDatepickerModule,
     {
       provide: MOMENT,
       useValue: moment,
-    }
+    },
+    { provide: LOCALE_ID, useValue: 'fr-FR'},
   ],
   bootstrap: [AppComponent]
 })

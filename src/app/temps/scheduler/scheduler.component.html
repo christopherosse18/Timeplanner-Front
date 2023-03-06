@@ -83,7 +83,16 @@
         >
       </div>
       <mat-form-field>
-        <input matInput type="time" placeholder="start date">
+        <input matInput type="date-time" placeholder="start date">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput [ngxMatDatetimePicker]="picker"
+               placeholder="Choose a date"
+               [formControl]="dateControl">
+        <mat-datepicker-toggle matSuffix [for]="$any(picker)">
+        </mat-datepicker-toggle>
+        <ngx-mat-datetime-picker #picker>
+        </ngx-mat-datetime-picker>
       </mat-form-field>
     </mat-expansion-panel>
   </mat-accordion>
@@ -92,8 +101,8 @@
 
 </div>
 <div>
-  <button mat-raised-button color="primary" >
-  Refresh
+  <button mat-raised-button color="primary" (click)="createEvent()">
+  Nouveau
   </button>
 </div>
 <br />
