@@ -45,12 +45,21 @@ function getDayNumberByName(jour : string){
 }
 function getRightColor(typeSaisie : string){
   let couleur;
-  if (typeSaisie == "travail") {
+  if (typeSaisie == "Travail") {
     couleur = colors.blue
   } else {
     couleur = colors.yellow
   }
   return couleur;
+}
+function findIdJourByDate(semaine: SemaineTravail, date: string | null){
+  let currentJour = {} as JoursTravail;
+  for (const jour of semaine.joursTravail) {
+    if (jour.date == date) {
+      currentJour = jour;
+    }
+  }
+  return currentJour;
 }
 
 let reponse: any;
@@ -132,28 +141,20 @@ export class SchedulerComponent implements OnInit {
       })
     })
   }
-  findIdJourByDate(date : string){
-    let currentJour = {} as JoursTravail;
-    for (const jour of this.semaine.joursTravail) {
-      if (jour.date == date) {
-        currentJour = jour;
-      }
-    }
-    return currentJour;
-}
 
   openDialog(event : Saisie): void {
-    let pipe = new DatePipe('fr-FR');
-    let eventDate = pipe.transform(event.end, 'yyyy-MM-dd')
+    /*let pipe = new DatePipe('fr-FR');
+    let eventDate = pipe.transform(event.end, 'yyyy-MM-dd')*/
+    /*let idJour = this.findIdJourByDate(eventDate).idJourTravail*/
     // @ts-ignore
-    console.log(eventDate);
+
     // @ts-ignore
-    let idJour = this.findIdJourByDate(eventDate).idJourTravail
+
     event.username = this.user.username;
     event.semaineNb = this.semaine.numSemaine;
-    event.idJourTravail = idJour;
+    event.semaine = this.semaine;
     //event.idJourTravail = this.findIdJourByDate(eventDate).idJourTravail
-    console.log(idJour)
+    console.log(event.idJourTravail)
     const dialogRef = this.dialog.open(EventDetails, {
       data: event,
     });
@@ -213,6 +214,8 @@ export class SchedulerComponent implements OnInit {
         beforeStart: true, // this allows you to configure the sides the event is resizable from
         afterEnd: true,
       },
+      idJourTravail: saisie.idJourTravail,
+      idSaisie: saisie.idSaisie,
       typeSaisie: saisie.typeSaisie,
       heureDebut: saisie.heureDebut,
       heureFin: saisie.heureFin,
@@ -293,10 +296,13 @@ export class EventDetails {
   }
   async createNewSaisie(saisie: Saisie){
     let pipe = new DatePipe('fr-FR');
+    let eventDate = pipe.transform(this.endDate, 'yyyy-MM-dd')
+    console.log(eventDate)
+    saisie.idJourTravail = findIdJourByDate(saisie.semaine, eventDate).idJourTravail;
     saisie.title = this.selected;
     saisie.heureDebut = <string>pipe.transform(this.startDate, 'HH:mm:ss')
     saisie.heureFin = <string>pipe.transform(this.endDate, 'H:mm:ss')
-    saisie.typeSaisie = this.selected.toLowerCase();
+    saisie.typeSaisie = this.selected;
     saisie.color = getRightColor(saisie.typeSaisie)
     await this.postSaisie(saisie);
 
