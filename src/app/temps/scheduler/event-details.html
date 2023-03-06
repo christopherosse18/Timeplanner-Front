@@ -38,6 +38,16 @@
       </ngx-mat-datetime-picker>
     </mat-form-field>
   </div>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Type de saisie</mat-label>
+      <mat-select [(value)]="selected">
+        <mat-option *ngFor="let saisie of typeSaisie" [value]="saisie">
+          {{saisie}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onNoClick()">No Thanks</button>

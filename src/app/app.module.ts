@@ -27,7 +27,7 @@ import {
   MOMENT
 } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import {MatNativeDateModule} from "@angular/material/core";
+import {MatNativeDateModule, MatOptionModule} from "@angular/material/core";
 import * as moment from 'moment';
 import {AppRoutingModule} from "./app-routing.module";
 import {MatExpansionModule} from "@angular/material/expansion";
@@ -38,6 +38,7 @@ import {
   NgxMatTimepickerModule
 } from "@angular-material-components/datetime-picker";
 import {registerLocaleData} from "@angular/common";
+import {MatSelectModule} from "@angular/material/select";
 
 export function momentAdapterFactory() {
   return adapterFactory();
@@ -87,6 +88,8 @@ export function momentAdapterFactory() {
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
+    MatOptionModule,
+    MatSelectModule,
   ],
   providers: [
     MatDatepickerModule,

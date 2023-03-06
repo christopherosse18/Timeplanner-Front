@@ -16,10 +16,6 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // @ts-ignore
-    /*this.value = JSON.parse(this.route.snapshot.paramMap.get('user'|| '{}'));
-    */
-    console.log(this.user)
   }
 
 }

@@ -1,22 +1,11 @@
-import {ChangeDetectionStrategy, Component, Inject, Input, OnInit, Pipe, ViewEncapsulation} from '@angular/core';
-import {async, lastValueFrom, Subject} from "rxjs";
-import { addDays } from 'date-fns';
-import {
-  CalendarDateFormatter,
-  CalendarEvent,
-  CalendarEventTimesChangedEvent,
-  CalendarView, DAYS_OF_WEEK,
-} from 'angular-calendar';
+import {ChangeDetectionStrategy, Component, Inject, Input, OnInit, ViewEncapsulation} from '@angular/core';
+import {lastValueFrom, Subject} from "rxjs";
+import {addDays} from 'date-fns';
+import {CalendarDateFormatter, CalendarEventTimesChangedEvent, CalendarView, DAYS_OF_WEEK,} from 'angular-calendar';
 import {Utilisateur} from "../../interfaces/utilisateur";
 import {CustomDateFormatter} from "./custom-date-formatter.provider";
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material/dialog";
-import { EventColor } from 'calendar-utils';
 import {colors} from "./colors";
-import {
-  NgxMatDatetimePickerModule,
-  NgxMatNativeDateModule,
-  NgxMatTimepickerModule
-} from '@angular-material-components/datetime-picker';
 import * as moment from "moment";
 import {now} from "moment";
 import {SaisieService} from "./saisie.service";
@@ -25,7 +14,9 @@ import {Saisie} from "../../interfaces/saisie";
 import {SemaineTravail} from "../../interfaces/semaineTravail";
 import {DatePipe} from "@angular/common";
 
-
+function sleep(ms: number | undefined) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 function getDayNumberByName(jour : string){
   let valeurJour: number = 0;
   switch (jour) {
@@ -52,7 +43,17 @@ function getDayNumberByName(jour : string){
   }
   return valeurJour;
 }
+function getRightColor(typeSaisie : string){
+  let couleur;
+  if (typeSaisie == "travail") {
+    couleur = colors.blue
+  } else {
+    couleur = colors.yellow
+  }
+  return couleur;
+}
 
+let reponse: any;
 
 @Component({
   selector: 'app-scheduler',
@@ -78,12 +79,12 @@ export class SchedulerComponent implements OnInit {
   currentWeek: number = moment(now()).isoWeek();
 
   clickedColumn: number = 0;
-  reponse: any;
   semaine={} as SemaineTravail;
+
 
   viewDate = new Date();
   // @ts-ignore
-  currentEvent: CalendarEvent = {
+  currentEvent: Saisie = {
     title: 'Resizable event',
     color: colors.red,
     start: new Date("2023-03-06 08:00:00"),
@@ -94,25 +95,7 @@ export class SchedulerComponent implements OnInit {
     },
   };
 
-  events: CalendarEvent[] = [
-    this.currentEvent/*
-    {
-      title: 'Resizable event',
-      //color: colors.yellow,
-      start: new Date("2023-03-06 08:00:00"),
-      end: addDays(new Date(), 1), // an end date is always required for resizable events to work
-      resizable: {
-        beforeStart: true, // this allows you to configure the sides the event is resizable from
-        afterEnd: true,
-      },
-    }*/,
-    {
-      title: 'A non resizable event',
-      //color: colors.blue,
-      start: new Date("2023-03-06"),
-      end: addDays(new Date(), 1),
-    },
-  ];
+  events: Saisie[] = [];
   constructor(public dialog: MatDialog, public saisieService: SaisieService/*, private datePipe: DatePipe*/) {
     // @ts-ignore
     this.user= {departements: [], email: "", idUtilisateur: "", nom: "", prenom: "", temps: undefined, username: ""};
@@ -149,12 +132,34 @@ export class SchedulerComponent implements OnInit {
       })
     })
   }
+  findIdJourByDate(date : string){
+    let currentJour = {} as JoursTravail;
+    for (const jour of this.semaine.joursTravail) {
+      if (jour.date == date) {
+        currentJour = jour;
+      }
+    }
+    return currentJour;
+}
 
-  openDialog(event : CalendarEvent): void {
+  openDialog(event : Saisie): void {
+    let pipe = new DatePipe('fr-FR');
+    let eventDate = pipe.transform(event.end, 'yyyy-MM-dd')
+    // @ts-ignore
+    console.log(eventDate);
+    // @ts-ignore
+    let idJour = this.findIdJourByDate(eventDate).idJourTravail
+    event.username = this.user.username;
+    event.semaineNb = this.semaine.numSemaine;
+    event.idJourTravail = idJour;
+    //event.idJourTravail = this.findIdJourByDate(eventDate).idJourTravail
+    console.log(idJour)
     const dialogRef = this.dialog.open(EventDetails, {
       data: event,
     });
 
+
+    // @ts-ignore
     dialogRef.afterClosed().subscribe(result => {
       this.refresh.next();
     });
@@ -162,7 +167,7 @@ export class SchedulerComponent implements OnInit {
     //this.currentEvent.end=new Date("2023-03-06 15:00:00")
     this.refresh.next();
   }
-  eventClicked({ event }: { event: CalendarEvent }): void {
+  eventClicked({ event }: { event: Saisie }): void {
     this.openDialog(event)
 
     this.refresh.next();
@@ -182,14 +187,43 @@ export class SchedulerComponent implements OnInit {
           beforeStart: true, // this allows you to configure the sides the event is resizable from
           afterEnd: true,
         }
-    } as CalendarEvent
+    } as Saisie
     this.openDialog(newEvent);
     this.events.push(newEvent)
     this.refresh.next();
   }
 
-  async postSaisie(semaineNb:number, jourTravail: JoursTravail, saisie: Saisie){
-    await lastValueFrom(this.saisieService.postUsername(this.reponse, this.user.username, semaineNb, jourTravail, saisie)).then(
+  generateAllStoredEvents(semaine: SemaineTravail){
+    for (const semaineElement of semaine.joursTravail) {
+      for (const jour of semaineElement.saisies) {
+        this.events.push(this.generateStoredEvent(semaineElement.date, jour))
+      }
+    }
+    this.refresh.next();
+  }
+
+  generateStoredEvent(date: string, saisie: Saisie ){
+    let couleur = getRightColor(saisie.typeSaisie);
+    return {
+      title: saisie.typeSaisie,
+      start: new Date(date + " " + saisie.heureDebut),
+      end: new Date(date + " " +  saisie.heureFin),
+      color: couleur,
+      resizable: {
+        beforeStart: true, // this allows you to configure the sides the event is resizable from
+        afterEnd: true,
+      },
+      typeSaisie: saisie.typeSaisie,
+      heureDebut: saisie.heureDebut,
+      heureFin: saisie.heureFin,
+    } as Saisie
+  }
+
+
+
+
+  async postSaisie(saisie: Saisie){
+    await lastValueFrom(this.saisieService.postSaisie(reponse, saisie)).then(
       (newSaisie) =>{
         this.lastSaisie = newSaisie;
       }
@@ -215,12 +249,11 @@ export class SchedulerComponent implements OnInit {
     )
   }
 
-  ngOnInit(): void {
-    this.addNonWorkedDays(this.excludeDays)
-    console.log(this.currentWeek)
-    console.log(moment("2023-03-03T17:44:56.144")/*.startOf("week")*/.isoWeek())
-    this.getTempsExist(this.user.username)
-    this.getWeekExist(this.user.username)
+  async ngOnInit(): Promise<void> {
+    await this.addNonWorkedDays(this.excludeDays)
+    await this.getTempsExist(this.user.username)
+    await this.getWeekExist(this.user.username)
+    this.generateAllStoredEvents(this.semaine)
     /*console.log(moment(now()).get());*/
   }
 
@@ -235,10 +268,13 @@ export class SchedulerComponent implements OnInit {
 export class EventDetails {
   startDate: any;
   endDate: any;
+  typeSaisie: String[] = ["Travail", "Pause"];
+  selected: string = "";
 
   constructor(
     public dialogRef: MatDialogRef<EventDetails>,
-    @Inject(MAT_DIALOG_DATA) public data: CalendarEvent,
+    @Inject(MAT_DIALOG_DATA) public data: Saisie,
+    public saisieService: SaisieService
   ) {
     this.startDate = this.data.start
     // @ts-ignore
@@ -248,10 +284,31 @@ export class EventDetails {
   onNoClick(): void {
     this.dialogRef.close();
   }
+  async postSaisie(saisie: Saisie){
+    await lastValueFrom(this.saisieService.postSaisie(reponse, saisie)).then(
+      (newSaisie) =>{
+        this.data = newSaisie;
+      }
+    )
+  }
+  async createNewSaisie(saisie: Saisie){
+    let pipe = new DatePipe('fr-FR');
+    saisie.title = this.selected;
+    saisie.heureDebut = <string>pipe.transform(this.startDate, 'HH:mm:ss')
+    saisie.heureFin = <string>pipe.transform(this.endDate, 'H:mm:ss')
+    saisie.typeSaisie = this.selected.toLowerCase();
+    saisie.color = getRightColor(saisie.typeSaisie)
+    await this.postSaisie(saisie);
 
-  changeDate(): void {
+    return saisie;
+  }
+
+  async changeDate() {
     this.data.start = this.startDate;
     this.data.end = this.endDate;
+    this.data.typeSaisie = this.selected;
+    this.data = await this.createNewSaisie(this.data)
+    console.log(this.data)
 
     /*this.data.start= new Date(this.data.start.getFullYear()+"-"+
       (this.data.start.getMonth()+1)+"-"+this.data.start.getDate()+" "+this.startDate)
