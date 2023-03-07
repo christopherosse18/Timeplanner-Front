@@ -70,15 +70,6 @@
           Day</button>
         </div>
       </div>
-      <div class="alert alert-info">
-        Click on a day or time slot on the view.
-        <strong *ngIf="clickedDate"
-        >You clicked on this time: {{ clickedDate | date:'medium' }}</strong
-        >
-        <strong *ngIf="clickedColumn !== undefined"
-        >You clicked on this column: {{ clickedColumn }}</strong
-        >
-      </div>
       <mat-form-field>
         <input matInput type="date-time" placeholder="start date">
       </mat-form-field>

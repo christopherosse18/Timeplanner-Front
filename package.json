@@ -24,6 +24,7 @@
     "angular-calendar": "^0.31.0",
     "date-fns": "^2.29.3",
     "moment": "^2.29.4",
+    "ngx-mat-moment-adapter": "^1.0.0-beta.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"

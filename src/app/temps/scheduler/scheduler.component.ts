@@ -89,8 +89,7 @@ export class SchedulerComponent implements OnInit {
 
   clickedColumn: number = 0;
   semaine={} as SemaineTravail;
-
-
+  pipe = new DatePipe('fr-FR');
   viewDate = new Date();
   // @ts-ignore
 
@@ -162,6 +161,7 @@ export class SchedulerComponent implements OnInit {
   }
   createEventClick(date : Date) {
     let nowPlusOne = moment(date).add(1,'hour')
+    //date= this.pipe.transform(date, 'dd-MM-yyyy HH:mm:ss')
     let newEvent =  {
       /*title: 'Resizable event',*/
       //color: colors.yellow,
