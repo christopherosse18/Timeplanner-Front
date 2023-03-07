@@ -310,10 +310,11 @@ export class EventDetails {
   async deleteSaisie(saisie: Saisie){
     await lastValueFrom(this.saisieService.deleteSaisie(saisie)).then(
       (value) =>{
+        this.data.supprime= true;
+        this.dialogRef.close(this.data);
       }
     )
-    this.data.supprime= true;
-    this.onNoClick();
+
   }
   async createNewSaisie(saisie: Saisie){
     let pipe = new DatePipe('fr-FR');
