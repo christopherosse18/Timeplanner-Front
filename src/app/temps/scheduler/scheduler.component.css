@@ -2,3 +2,6 @@
   color: white;
   text-align: center;
 }
+.btnClose{
+  align-items: flex-end;
+}

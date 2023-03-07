@@ -10,4 +10,5 @@ export interface Saisie extends CalendarEvent{
   idJourTravail: string;
   username : string;
   semaineNb:number;
+  supprime:boolean
 }

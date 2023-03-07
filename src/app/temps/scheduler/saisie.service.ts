@@ -31,4 +31,10 @@ export class SaisieService {
   public getWeekExist(username: string, date: string):Observable<any>{
     return this.http.get(this.urlBack+"temps/weekExist?username="+username+"&date="+date);
   }
+  public deleteSaisie(saisie: Saisie): Observable<any>{
+    let body: any;
+    // @ts-ignore
+    return this.http.delete(this.urlBack+"semaine/" + saisie.username + "/" + saisie.semaineNb
+      +"/deleteSaisie?idSaisie="+saisie.idSaisie, body);
+  }
 }

@@ -98,7 +98,7 @@
 
 </div>
 <div>
-  <button mat-raised-button color="primary" (click)="createEvent()">
+  <button mat-raised-button color="primary" (click)="createEventBtn()">
   Nouveau
   </button>
 </div>
@@ -127,7 +127,7 @@
     [refresh]="refresh"
     (eventTimesChanged)="eventTimesChanged($event)"
     (dayHeaderClicked)="clickedDate = $event.day.date"
-    (hourSegmentClicked)="clickedDate = $event.date"
+    (hourSegmentClicked)="clickedDate = $event.date; createEventClick($event.date)"
     (eventClicked)="eventClicked($event)"
   >
   </mwl-calendar-week-view>

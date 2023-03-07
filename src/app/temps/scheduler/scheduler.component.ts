@@ -93,16 +93,7 @@ export class SchedulerComponent implements OnInit {
 
   viewDate = new Date();
   // @ts-ignore
-  currentEvent: Saisie = {
-    title: 'Resizable event',
-    color: colors.red,
-    start: new Date("2023-03-06 08:00:00"),
-    end: addDays(new Date(), 1), // an end date is always required for resizable events to work
-    resizable: {
-      beforeStart: true, // this allows you to configure the sides the event is resizable from
-      afterEnd: true,
-    },
-  };
+
 
   events: Saisie[] = [];
   constructor(public dialog: MatDialog, public saisieService: SaisieService/*, private datePipe: DatePipe*/) {
@@ -142,31 +133,26 @@ export class SchedulerComponent implements OnInit {
     })
   }
 
-  openDialog(event : Saisie): void {
-    /*let pipe = new DatePipe('fr-FR');
-    let eventDate = pipe.transform(event.end, 'yyyy-MM-dd')*/
-    /*let idJour = this.findIdJourByDate(eventDate).idJourTravail*/
-    // @ts-ignore
-
-    // @ts-ignore
-
+  openDialog(event : Saisie): void{
     event.username = this.user.username;
     event.semaineNb = this.semaine.numSemaine;
     event.semaine = this.semaine;
-    //event.idJourTravail = this.findIdJourByDate(eventDate).idJourTravail
-    console.log(event.idJourTravail)
+    console.log("ID"+event.idJourTravail)
     const dialogRef = this.dialog.open(EventDetails, {
       data: event,
     });
-
-
-    // @ts-ignore
     dialogRef.afterClosed().subscribe(result => {
+      console.log(event)
+      event=result;
+      if (event.supprime){
+        console.log("Rentre dlete")
+        this.events.splice(this.events.findIndex(item => item.idJourTravail === event.idJourTravail),1)
+        this.refresh.next();
+      }
       this.refresh.next();
     });
-      //event.start = new Date("2023-03-06"+this.currentEvent.start.getHours()+":00:00")
-    //this.currentEvent.end=new Date("2023-03-06 15:00:00")
     this.refresh.next();
+    console.log("Après")
   }
   eventClicked({ event }: { event: Saisie }): void {
     this.openDialog(event)
@@ -174,11 +160,29 @@ export class SchedulerComponent implements OnInit {
     this.refresh.next();
     console.log('Event clicked', event);
   }
+  createEventClick(date : Date) {
+    let nowPlusOne = moment(date).add(1,'hour')
+    let newEvent =  {
+      /*title: 'Resizable event',*/
+      //color: colors.yellow,
+      start : date,
+      end : new Date(nowPlusOne.toDate()),
+      /*start: startDate,
+      end: endDate, // an end date is always required for resizable events to work*/
+      resizable: {
+        beforeStart: true, // this allows you to configure the sides the event is resizable from
+        afterEnd: true,
+      }
+    } as Saisie
+    this.openDialog(newEvent);
+    this.events.push(newEvent)
+    this.refresh.next();
+  }
 
-  createEvent(/*startDate: Date, endDate: Date, name: string, typeSaisie*/) {
+  createEventBtn(/*startDate: Date, endDate: Date, name: string, typeSaisie*/) {
     let nowPlusOne = moment(now()).add(1,'hour')
     let newEvent =  {
-        title: 'Resizable event',
+        /*title: 'Resizable event',*/
         //color: colors.yellow,
         start : new Date(moment(now()).toDate()),
         end : new Date(nowPlusOne.toDate()),
@@ -195,9 +199,11 @@ export class SchedulerComponent implements OnInit {
   }
 
   generateAllStoredEvents(semaine: SemaineTravail){
-    for (const semaineElement of semaine.joursTravail) {
-      for (const jour of semaineElement.saisies) {
-        this.events.push(this.generateStoredEvent(semaineElement.date, jour))
+    for (const jour of semaine.joursTravail) {
+      for (const saisie of jour.saisies) {
+        let newEvent = this.generateStoredEvent(jour.date, saisie) as Saisie;
+        newEvent.idJourTravail=jour.idJourTravail;
+        this.events.push(newEvent)
       }
     }
     this.refresh.next();
@@ -272,7 +278,8 @@ export class EventDetails {
   startDate: any;
   endDate: any;
   typeSaisie: String[] = ["Travail", "Pause"];
-  selected: string = "";
+  selected: string = "Travail";
+  returnSaisie= {} as Saisie;
 
   constructor(
     public dialogRef: MatDialogRef<EventDetails>,
@@ -285,14 +292,28 @@ export class EventDetails {
   }
 
   onNoClick(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(this.data);
   }
   async postSaisie(saisie: Saisie){
     await lastValueFrom(this.saisieService.postSaisie(reponse, saisie)).then(
       (newSaisie) =>{
-        this.data = newSaisie;
+        this.returnSaisie = newSaisie;
       }
     )
+    return this.returnSaisie
+  }
+
+  closeBtn(){
+    this.data.supprime=true;
+    this.dialogRef.close(this.data)
+  }
+  async deleteSaisie(saisie: Saisie){
+    await lastValueFrom(this.saisieService.deleteSaisie(saisie)).then(
+      (value) =>{
+      }
+    )
+    this.data.supprime= true;
+    this.onNoClick();
   }
   async createNewSaisie(saisie: Saisie){
     let pipe = new DatePipe('fr-FR');
@@ -301,28 +322,20 @@ export class EventDetails {
     saisie.idJourTravail = findIdJourByDate(saisie.semaine, eventDate).idJourTravail;
     saisie.title = this.selected;
     saisie.heureDebut = <string>pipe.transform(this.startDate, 'HH:mm:ss')
-    saisie.heureFin = <string>pipe.transform(this.endDate, 'H:mm:ss')
+    saisie.heureFin = <string>pipe.transform(this.endDate, 'HH:mm:ss')
     saisie.typeSaisie = this.selected;
     saisie.color = getRightColor(saisie.typeSaisie)
-    await this.postSaisie(saisie);
-
-    return saisie;
+    this.returnSaisie = await this.postSaisie(saisie);
+    console.log(this.returnSaisie)
+    this.data.idSaisie = this.returnSaisie.idSaisie;
   }
 
   async changeDate() {
     this.data.start = this.startDate;
     this.data.end = this.endDate;
     this.data.typeSaisie = this.selected;
-    this.data = await this.createNewSaisie(this.data)
-    console.log(this.data)
-
-    /*this.data.start= new Date(this.data.start.getFullYear()+"-"+
-      (this.data.start.getMonth()+1)+"-"+this.data.start.getDate()+" "+this.startDate)
-    console.log(this.endDate)
-    //this.data.start = this.startDate
-    this.data.end = new Date(this.data?.end?.getFullYear()+"-"+
-      // @ts-ignore
-      (this.data?.end?.getMonth()+1)+"-"+this.data?.end?.getDate()+" "+this.endDate)*/
+    await this.createNewSaisie(this.data)
+    this.dialogRef.close(this.data)
   }
 
 
