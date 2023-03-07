@@ -11,4 +11,5 @@ export interface Saisie extends CalendarEvent{
   username : string;
   semaineNb:number;
   supprime:boolean
+  close:boolean
 }

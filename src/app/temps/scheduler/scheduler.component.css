@@ -5,3 +5,14 @@
 .btnClose{
   align-items: flex-end;
 }
+.btnPrevious{
+  justify-self: end;
+}
+.box{
+  display: grid;
+  grid-template-columns: 1fr 0.5fr 1fr;
+}
+.btnCentre{
+  justify-self: center;
+  align-self: center;
+}

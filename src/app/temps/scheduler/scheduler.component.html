@@ -1,27 +1,30 @@
 <div class="row text-center">
   <mat-card>
     <mat-card-content>
-      <div class="titre">
-        <h1>
-          {{ viewDate | calendarDate:(view +
-          'ViewTitle'):'en':weekStartsOn:excludeDays }}
-        </h1>
-      </div>
-      <div class="btn-group">
-        <div
-          class="btn btn-primary"
-          mwlCalendarPreviousView
-          [view]="view"
-          [(viewDate)]="viewDate"
-          [excludeDays]="excludeDays"
-        ><button mat-raised-button color="primary">Previous</button>
+      <div class="box">
+        <div class="btnPrevious">
+          <div
+            class="btn btn-primary"
+            mwlCalendarPreviousView
+            [view]="view"
+            [(viewDate)]="viewDate"
+            [excludeDays]="excludeDays"
+          ><button mat-raised-button color="primary" (click)="lastWeekBtn(user.username, viewDate)"><mat-icon style="transform: scale(1.5)">keyboard_arrow_left</mat-icon>Avant</button>
+          </div>
         </div>
-        <div
-          class="btn btn-outline-secondary"
-          mwlCalendarToday
-          [(viewDate)]="viewDate"
-        >
-          <button mat-raised-button color="primary">Today</button>
+        <div class="titre">
+          <h1>
+            {{ viewDate | calendarDate:(view +
+            'ViewTitle'):'fr-FR':weekStartsOn:excludeDays }}
+            <span
+              class="btn btn-outline-secondary"
+              mwlCalendarToday
+              [(viewDate)]="viewDate"
+            >
+              <button mat-button (click)="getWeekExistBtn(user.username, viewDate)">
+                <mat-icon style="transform: scale(1.5)">refresh</mat-icon>
+              </button></span>
+          </h1>
         </div>
         <div
           class="btn btn-primary"
@@ -29,110 +32,91 @@
           [view]="view"
           [(viewDate)]="viewDate"
           [excludeDays]="excludeDays"
-        ><button mat-raised-button color="primary">
-          Next</button>
+        ><button mat-raised-button color="primary" (click)="nextWeekBtn(user.username, viewDate)">Suivant <mat-icon style="transform: scale(1.5); justify-self: end;">keyboard_arrow_right</mat-icon></button>
         </div>
       </div>
+      <div class="btn-group">
 
+      </div>
     </mat-card-content>
   </mat-card>
-  <mat-accordion>
-    <mat-expansion-panel (opened)="panelOpenState = true"
-                         (closed)="panelOpenState = false">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Self aware panel
-        </mat-panel-title>
-        <mat-panel-description>
-          Currently I am {{panelOpenState ? 'open' : 'closed'}}
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-      <div class="btn-group">
-        <div
-          class="btn btn-primary"
-          (click)="view = CalendarView.Month"
-          [class.active]="view === 'month'"
-        ><button mat-raised-button color="primary">
-          Month </button>
-        </div>
-        <div
-          class="btn btn-primary"
-          (click)="view = CalendarView.Week"
-          [class.active]="view === 'week'"
-        ><button mat-raised-button color="primary">
-          Week</button>
-        </div>
-        <div
-          class="btn btn-primary"
-          (click)="view = CalendarView.Day"
-          [class.active]="view === 'day'"
-        ><button mat-raised-button color="primary">
-          Day</button>
-        </div>
+
+</div>
+<mat-drawer-container class="example-container" autosize>
+  <mat-drawer #drawer class="example-sidenav" mode="side">
+    <div class="btn-group">
+      <div
+        class="btn btn-primary"
+        (click)="view = CalendarView.Month"
+        [class.active]="view === 'month'"
+      ><button mat-raised-button color="primary">
+        Month </button>
       </div>
-      <mat-form-field>
-        <input matInput type="date-time" placeholder="start date">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput [ngxMatDatetimePicker]="picker"
-               placeholder="Choose a date"
-               [formControl]="dateControl">
-        <mat-datepicker-toggle matSuffix [for]="$any(picker)">
-        </mat-datepicker-toggle>
-        <ngx-mat-datetime-picker #picker>
-        </ngx-mat-datetime-picker>
-      </mat-form-field>
-    </mat-expansion-panel>
-  </mat-accordion>
+      <div
+        class="btn btn-primary"
+        (click)="view = CalendarView.Week"
+        [class.active]="view === 'week'"
+      ><button mat-raised-button color="primary">
+        Week</button>
+      </div>
+    </div>
+  </mat-drawer>
+  <div class="example-sidenav-content">
+    <div class="box">
+      <div>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon" (click)="drawer.toggle()">
+          <mat-icon style="transform: scale(1.4)">menu</mat-icon>
+        </button>
+      </div>
+      <div class="btnCentre">
+        <div *ngIf="view != CalendarView.Month"><button mat-raised-button color="primary" (click)="createEventBtn()">
+          Nouveau
+        </button></div>
+      </div>
+    </div>
+
+    <div [ngSwitch]="view">
+      <mwl-calendar-month-view style="color: #303030"
+        *ngSwitchCase="'month'"
+        [viewDate]="viewDate"
+        [events]="events"
+        [excludeDays]="excludeDays"
+        [refresh]="refresh"
+        (eventTimesChanged)="eventTimesChanged($event)"
+        (columnHeaderClicked)="clickedColumn = $event.isoDayNumber"
+        (dayClicked)="clickedDate = $event.day.date"
+        (eventClicked)="eventClicked($event)"
+      >
+      </mwl-calendar-month-view>
+      <mwl-calendar-week-view style="color: #303030"
+        *ngSwitchCase="'week'"
+        [excludeDays]="excludeDays"
+        [viewDate]="viewDate"
+        [events]="events"
+        [dayStartHour]="7"
+        [dayEndHour]="19"
+        [refresh]="refresh"
+        (eventTimesChanged)="eventTimesChanged($event)"
+        (dayHeaderClicked)="clickedDate = $event.day.date"
+        (hourSegmentClicked)="clickedDate = $event.date; createEventClick($event.date)"
+        (eventClicked)="eventClicked($event)"
+      >
+      </mwl-calendar-week-view>
+      <!--<mwl-calendar-day-view style="color: #303030"
+        *ngSwitchCase="'day'"
+        [viewDate]="viewDate"
+        [events]="events"
+        [dayStartHour]="7"
+        [dayEndHour]="19"
+        [refresh]="refresh"
+        (eventTimesChanged)="eventTimesChanged($event)"
+        (eventClicked)="eventClicked($event);"
+        [(ngModel)]="events"
+      >
+      </mwl-calendar-day-view>-->
+    </div>
+  </div>
+
+</mat-drawer-container>
 
 
-
-</div>
-<div>
-  <button mat-raised-button color="primary" (click)="createEventBtn()">
-  Nouveau
-  </button>
-</div>
-<br />
-
-<div [ngSwitch]="view">
-  <mwl-calendar-month-view
-    *ngSwitchCase="'month'"
-    [viewDate]="viewDate"
-    [events]="events"
-    [excludeDays]="excludeDays"
-    [refresh]="refresh"
-    (eventTimesChanged)="eventTimesChanged($event)"
-    (columnHeaderClicked)="clickedColumn = $event.isoDayNumber"
-    (dayClicked)="clickedDate = $event.day.date"
-    (eventClicked)="eventClicked($event)"
-  >
-  </mwl-calendar-month-view>
-  <mwl-calendar-week-view
-    *ngSwitchCase="'week'"
-    [excludeDays]="excludeDays"
-    [viewDate]="viewDate"
-    [events]="events"
-    [dayStartHour]="7"
-    [dayEndHour]="19"
-    [refresh]="refresh"
-    (eventTimesChanged)="eventTimesChanged($event)"
-    (dayHeaderClicked)="clickedDate = $event.day.date"
-    (hourSegmentClicked)="clickedDate = $event.date; createEventClick($event.date)"
-    (eventClicked)="eventClicked($event)"
-  >
-  </mwl-calendar-week-view>
-  <mwl-calendar-day-view
-    *ngSwitchCase="'day'"
-    [viewDate]="viewDate"
-    [events]="events"
-    [dayStartHour]="7"
-    [dayEndHour]="19"
-    [refresh]="refresh"
-    (eventTimesChanged)="eventTimesChanged($event)"
-    (hourSegmentClicked)="clickedDate = $event.date"
-    (eventClicked)="eventClicked($event)"
-    [(ngModel)]="events"
-  >
-  </mwl-calendar-day-view>
-</div>

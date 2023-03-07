@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Détail de saisie
 <button mat-button class="btnClose" (click)="closeBtn()"><mat-icon>close</mat-icon></button></h1>
 <div mat-dialog-content>
-  <div>
+  <div >
     <mat-form-field>
       <input matInput [ngxMatDatetimePicker]="picker"
              placeholder="Choose a date"
@@ -35,8 +35,10 @@
     </mat-form-field>
   </div>
 </div>
-<div mat-dialog-actions>
-  <button mat-button color="warn"(click)="deleteSaisie(data)" [mat-dialog-close]="data" cdkFocusInitial>Supprimer</button>
-  <button mat-button  (click)="changeDate()">Ok</button>
+<div mat-dialog-actions style="margin-bottom: 5%; margin-left: 5%; margin-right: 5%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;">
+  <button mat-button color="warn"(click)="deleteSaisie(data)" [mat-dialog-close]="data" cdkFocusInitial style="justify-self: start">Supprimer</button>
+  <button mat-button  (click)="changeDate()" style="justify-self: end">Ok</button>
 </div>
 

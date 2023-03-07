@@ -1,19 +1,26 @@
-<div>
-  <mat-toolbar color="primary">
-    <span>Timeplanner</span>
-    <div class="logout">
-    <button mat-fab color="primary">
-      <span class="trigramme" [matMenuTriggerFor]="menu"><mat-icon [matMenuTriggerFor]="menu"> person</mat-icon></span>
-    </button>
-    <!-- Menu, affichage des résultats sous le cercle avec trigramme-->
-    <mat-menu #menu="matMenu" >
-      <mat-list role="list" >
-        <mat-list-item role="listitem">{{user.prenom}} {{this.user.nom}}</mat-list-item>
-        <mat-divider></mat-divider>
-        <mat-list-item role="listitem">{{user.departements[0].nom}}</mat-list-item>
-      </mat-list>
-      <mat-divider></mat-divider>
-    </mat-menu>
-</div>
+<div >
+  <mat-toolbar color="primary" class="box">
+      <div>
+
+      </div>
+      <div class="title">
+        <h1>Timeplanner</h1>
+      </div>
+      <div class="user">
+          <button mat-fab color="primary">
+            <span class="trigramme" [matMenuTriggerFor]="menu"><mat-icon style="transform: scale(1.3)" [matMenuTriggerFor]="menu"> person</mat-icon></span>
+          </button>
+          <!-- Menu, affichage des résultats sous le cercle avec trigramme-->
+          <mat-menu #menu="matMenu" >
+            <mat-list role="list" >
+              <mat-list-item role="listitem">{{user.prenom}} {{this.user.nom}}</mat-list-item>
+              <mat-divider></mat-divider>
+              <mat-list-item role="listitem">{{user.departements[0].nom}}</mat-list-item>
+            </mat-list>
+            <mat-divider></mat-divider>
+          </mat-menu>
+        </div>
+
+
   </mat-toolbar>
 </div>

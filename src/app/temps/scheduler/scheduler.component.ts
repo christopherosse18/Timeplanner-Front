@@ -107,6 +107,7 @@ export class SchedulerComponent implements OnInit {
   CalendarView = CalendarView;
 
   refresh = new Subject<void>();
+
   panelOpenState: boolean = false;
   dateControl: any;
 
@@ -147,7 +148,12 @@ export class SchedulerComponent implements OnInit {
         console.log("Rentre dlete")
         this.events.splice(this.events.findIndex(item => item.idJourTravail === event.idJourTravail),1)
         this.refresh.next();
+      } else if(event.close && event.idSaisie == null){
+        this.events.splice(this.events.findIndex(item => item.idJourTravail === event.idJourTravail),1)
+        this.refresh.next();
       }
+      event.close = false
+      event.supprime=false
       this.refresh.next();
     });
     this.refresh.next();
@@ -199,13 +205,16 @@ export class SchedulerComponent implements OnInit {
   }
 
   generateAllStoredEvents(semaine: SemaineTravail){
+    let newEvents = [] as Saisie[];
     for (const jour of semaine.joursTravail) {
       for (const saisie of jour.saisies) {
         let newEvent = this.generateStoredEvent(jour.date, saisie) as Saisie;
         newEvent.idJourTravail=jour.idJourTravail;
-        this.events.push(newEvent)
+        newEvents.push(newEvent)
       }
     }
+    this.events = newEvents
+    console.log(this.events)
     this.refresh.next();
   }
 
@@ -247,6 +256,32 @@ export class SchedulerComponent implements OnInit {
   }
   async getWeekExist(username: string){
     let current = moment(now()).toDate().toISOString();
+    let pipe = new DatePipe('fr-FR');
+    let newDate = pipe.transform(current, 'yyyy-MM-dd')
+
+    // @ts-ignore
+    await lastValueFrom(this.saisieService.getWeekExist(username, newDate.toString())).then(
+      (newSemaine)=>{
+        this.semaine = newSemaine;
+      }
+    )
+  }
+  async nextWeekBtn(username: string, date: Date){
+    let daysPlusSeven = new Date(date)
+    daysPlusSeven.setDate(date.getDate()+7)
+    await this.getWeekExistBtn(username, daysPlusSeven)
+    this.generateAllStoredEvents(this.semaine)
+    this.refresh.next()
+  }
+  async lastWeekBtn(username: string, date: Date){
+    let daysMinusSeven = new Date(date)
+    daysMinusSeven.setDate(date.getDate()-7)
+    await this.getWeekExistBtn(username, daysMinusSeven)
+    this.generateAllStoredEvents(this.semaine)
+    this.refresh.next()
+  }
+  async getWeekExistBtn(username: string, date: Date){
+    let current = date.toISOString();
     let pipe = new DatePipe('fr-FR');
     let newDate = pipe.transform(current, 'yyyy-MM-dd')
 
@@ -304,7 +339,7 @@ export class EventDetails {
   }
 
   closeBtn(){
-    this.data.supprime=true;
+    this.data.close=true;
     this.dialogRef.close(this.data)
   }
   async deleteSaisie(saisie: Saisie){

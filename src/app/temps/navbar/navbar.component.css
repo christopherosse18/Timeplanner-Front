@@ -1,0 +1,13 @@
+.box{
+  display: grid;
+  grid-template-columns: 1fr 0.5fr 1fr;
+}
+.user{
+  justify-self: end;
+  align-self: center;
+}
+.title{
+
+  justify-self: center;
+  align-self: end;
+}

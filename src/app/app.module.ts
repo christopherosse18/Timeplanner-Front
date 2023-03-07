@@ -39,6 +39,7 @@ import {
 } from "@angular-material-components/datetime-picker";
 import {registerLocaleData} from "@angular/common";
 import {MatSelectModule} from "@angular/material/select";
+import {MatSidenavModule} from "@angular/material/sidenav";
 
 export function momentAdapterFactory() {
   return adapterFactory();
@@ -90,6 +91,7 @@ export function momentAdapterFactory() {
     NgxMatNativeDateModule,
     MatOptionModule,
     MatSelectModule,
+    MatSidenavModule,
   ],
   providers: [
     MatDatepickerModule,
